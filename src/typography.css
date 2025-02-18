@@ -1,0 +1,96 @@
+@layer base { 
+  @font-face {
+    font-family: 'Stainless';
+    src: url('/fonts/Stainless-Light.woff2') format('woff2');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Stainless';
+    src: url('/fonts/Stainless-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Stainless';
+    src: url('/fonts/Stainless-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Roboto Slab';
+    src: url('/fonts/RobotoSlab-Thin.woff2') format('woff2');
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Roboto Slab';
+    src: url('/fonts/RobotoSlab-Light.woff2') format('woff2');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Roboto Slab';
+    src: url('/fonts/RobotoSlab-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Roboto Slab';
+    src: url('/fonts/RobotoSlab-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  /* Apply default font globally */
+  body {
+    @apply font-sans;
+  }
+}
+
+@layer components {
+  .h1 {
+    @apply font-display text-4xl font-bold;
+  }
+
+  .h2 {
+    @apply font-display text-3xl font-bold;
+  }
+
+  .h3 {
+    @apply font-display text-2xl font-bold;
+  }
+
+  .body-large {
+    @apply font-sans text-lg;
+  }
+
+  .body {
+    @apply font-sans text-base;
+  }
+
+  .caption {
+    @apply font-sans text-sm text-gray-500;
+  }
+
+  .emphasis {
+    @apply text-red-600 font-bold;
+  }
+
+  .subtle {
+    @apply text-gray-500;
+  }
+}

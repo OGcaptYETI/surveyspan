@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Reset default styles */
+body {
+  @apply font-stainless antialiased;
+}
+
+/* Brand-specific button styles */
+.btn-primary {
+  @apply bg-itg-red text-white font-stainless font-bold py-3 px-4 rounded-lg 
+         hover:bg-itg-red/90 transition-colors disabled:opacity-50;
+}
+
+.btn-secondary {
+  @apply bg-itg-black text-white font-stainless font-bold py-3 px-4 rounded-lg 
+         hover:bg-itg-black/90 transition-colors disabled:opacity-50;
+}
+
+/* Brand-specific input styles */
+.input-primary {
+  @apply w-full px-4 py-3 border border-itg-gray/20 rounded-lg 
+         focus:ring-2 focus:ring-itg-red/20 focus:border-itg-red 
+         transition-all font-stainless;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-stainless), sans-serif;
+  }
+
+  body {
+    @apply antialiased;
+  }
+}
