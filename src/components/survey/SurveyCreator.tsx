@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import Button from '@/src/components/Button';
-import Input from '@/src/components/Input';
+import Button from '@/components/Button';
+import Input from '@/components/Input';
 import { Question, QuestionType, Survey } from '../types/survey';
 
 interface SurveyCreatorProps {
@@ -20,6 +20,7 @@ const SurveyCreator: React.FC<SurveyCreatorProps> = ({ onSave }) => {
   const addQuestion = (type: QuestionType) => {
     const newQuestion: Question = {
       id: `q-${Date.now()}`,
+      survey_id: '',  // This will be set when the survey is created
       type,
       text: '',
       required: false,
@@ -82,9 +83,12 @@ const SurveyCreator: React.FC<SurveyCreatorProps> = ({ onSave }) => {
         title: 'Default Section',
         description: '', // Add this line
         order: 0,
-        questions: questions
+        questions: questions,
+        survey_id: '' // This will be set when the survey is created
       }],
-      isPublished: false
+      isPublished: false,
+      status: 'draft',
+      user_id: ''  // This will be set on the server side
     };
     await onSave(survey);
   });

@@ -6,7 +6,7 @@ import { toast } from "react-hot-toast";
 import type { Question, Section } from "@/components/types/survey";
 import type { ValidationRules } from "@/components/types/common";
 import SectionQuestions from "./questions/SectionQuestions";
-import useQuestionValidation from "@/hooks/useQuestionValidation";
+import useQuestionValidation from "@/app/hooks/useQuestionValidation";
 import { DEFAULT_VALIDATION_RULES } from "@/constants/validation";
 
 interface QuestionFormProps {
