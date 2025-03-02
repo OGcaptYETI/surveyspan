@@ -1,125 +1,156 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
+import DashboardNav from "./components/DashboardNav";
+import DashboardHeader from "./components/DashboardHeader";
 import supabase from "@/lib/supabase";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
+type UserRole = 'user' | 'admin' | 'super_admin';
 
-interface DashboardLayoutProps {
-  children: React.ReactNode;
+interface UserData {
+  id: string;
+  role: UserRole;
+  email: string;
+  organization?: {
+    name: string;
+    role: string;
+  };
 }
 
-export default function DashboardLayout({ children }: DashboardLayoutProps) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const [userName, setUserName] = useState("");
+  const pathname = usePathname();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [userData, setUserData] = useState<UserData | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.push("/");
-      } else {
-        setUserName(user.email || "");
+    const fetchUserData = async () => {
+      try {
+        setError(null);
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        
+        if (authError) throw authError;
+        if (!user) {
+          return; // Protected route will handle redirect
+        }
+
+        // Get user data including role and organization
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select(`
+            id,
+            role,
+            email,
+            organization
+          `)
+          .eq('id', user.id)
+          .single();
+
+        if (userError) throw userError;
+
+        setUserData(userData);
+      } catch (error) {
+        console.error('User data fetch failed:', error);
+        setError(error instanceof Error ? error.message : 'Failed to load user data');
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    checkAuth();
-  }, [router]);
+    fetchUserData();
+  }, []);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push("/");
+    try {
+      await supabase.auth.signOut();
+      router.push('/auth/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Sidebar */}
-      <aside className={`fixed top-0 left-0 z-40 w-64 h-screen transition-transform ${
-        isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-      }`}>
-        <div className="h-full px-3 py-4 overflow-y-auto bg-white border-r border-gray-200">
-          {/* Logo */}
-          <div className="flex items-center mb-8 px-2">
-            <span className="font-stainless text-2xl font-bold text-itg-red">SurveySpan</span>
-          </div>
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
 
-          {/* Navigation */}
-          <nav className="space-y-2">
-            <Link 
-              href="/dashboard"
-              className="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 font-stainless"
-            >
-              <span className="ml-3">Dashboard</span>
-            </Link>
-            <Link 
-              href="/dashboard/surveys"
-              className="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 font-stainless"
-            >
-              <span className="ml-3">My Surveys</span>
-            </Link>
-            <Link 
-              href="/dashboard/responses"
-              className="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 font-stainless"
-            >
-              <span className="ml-3">Responses</span>
-            </Link>
-            <Link 
-              href="/dashboard/settings"
-              className="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 font-stainless"
-            >
-              <span className="ml-3">Settings</span>
-            </Link>
-          </nav>
+  // Content to render after authentication
+  const dashboardContent = () => {
+    if (isLoading) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <LoadingSpinner size="large" />
         </div>
-      </aside>
+      );
+    }
 
-      {/* Main Content */}
-      <div className={`${isSidebarOpen ? "ml-64" : "ml-0"} transition-margin duration-300`}>
-        {/* Top Navigation */}
-        <header className="bg-white border-b border-gray-200">
-          <div className="px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
-            <button
-              title="Toggle sidebar"
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="p-2 rounded-lg text-gray-600 hover:bg-gray-100"
-            >
+    if (error) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <div className="text-center">
               <svg
-                className="w-6 h-6"
+                className="mx-auto h-12 w-12 text-red-500"
                 fill="none"
-                stroke="currentColor"
                 viewBox="0 0 24 24"
+                stroke="currentColor"
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                 />
               </svg>
-            </button>
-
-            {/* User Menu */}
-            <div className="flex items-center">
-              <div className="mr-4">
-                <span className="font-stainless text-sm text-gray-700">{userName}</span>
-              </div>
+              <h3 className="mt-4 text-lg font-medium text-gray-900">Error Loading Dashboard</h3>
+              <p className="mt-2 text-sm text-gray-500">{error}</p>
               <button
-                onClick={handleLogout}
-                className="px-4 py-2 text-sm font-stainless text-gray-700 hover:bg-gray-100 rounded-lg"
+                onClick={() => window.location.reload()}
+                className="mt-4 px-4 py-2 bg-itg-red text-white rounded-md hover:bg-red-700 transition-colors"
               >
-                Logout
+                Try Again
               </button>
             </div>
           </div>
-        </header>
+        </div>
+      );
+    }
 
-        {/* Page Content */}
-        <main className="p-4 sm:p-6 lg:p-8">
-          {children}
-        </main>
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <DashboardHeader 
+          userData={userData} 
+          userRole={userData?.role || 'user'} 
+          pathname={pathname || ''} 
+          onLogout={handleLogout}
+          toggleSidebar={toggleSidebar}
+        />
+        <div className="flex">
+          <DashboardNav
+            userData={userData}
+            pathname={pathname || ''}
+            userRole={userData?.role || 'user'}
+            onLogout={handleLogout}
+            isOpen={isSidebarOpen}
+          />
+          <main className={`transition-all duration-300 flex-1 p-6 overflow-auto ${isSidebarOpen ? 'ml-64' : 'ml-0'}`}>
+            <div className="max-w-7xl mx-auto">
+              {children}
+            </div>
+          </main>
+        </div>
       </div>
-    </div>
+    );
+  };
+
+  // Wrap everything in the ProtectedRoute component
+  return (
+    <ProtectedRoute>
+      {dashboardContent()}
+    </ProtectedRoute>
   );
 }

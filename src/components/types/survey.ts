@@ -1,5 +1,5 @@
 import { BaseEntity, ValidationRules, ValidationType } from "./common";
-
+import type { UserData as AuthUserData, UserRole } from './auth';
 
 // ================================
 // 📌 OPTION TYPE
@@ -193,3 +193,15 @@ export interface PreviewModalProps {
   }>;
   questions?: Question[];
 }
+
+export interface UserData extends AuthUserData {
+  id: string;
+  email: string;
+  name?: string;
+  created_at: string;
+  status: string;
+  email_verified: boolean;
+  last_sign_in_at?: string;
+  role: UserRole;
+}
+
